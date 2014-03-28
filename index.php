@@ -74,13 +74,7 @@ $app->post('/api/robots', function() use($app) {
 		$robot->id = $robot->id;
 		$response->setJsonContent(array('status' => 'OK', 'data' => $robot->toArray()));
 	} else {
-		$response->setStatusCode(409, "Conflict");
-		$errors = array();
-		foreach ($robot->getMessages() as $message) {
-			$errors[] = $message->getMessage();
-		}
-
-		$response->setJsonContent(array('status' => 'ERROR', 'message' => $errors));
+		getErrors($response, $robot);
 	}
 	return $response;
 });
@@ -101,13 +95,7 @@ $app->put('/api/robots/{id:[0-9]+}', function($id) use($app) {
 		if ($robot->save()) {
 			$response->setJsonContent(array('status' => 'OK'));
 		} else {
-			$response->setStatusCode(409, "Conflict");
-			$errors = array();
-			foreach ($robot->getMessages() as $message) {
-				$errors[] = $message->getMessage();
-			}
-
-			$response->setJsonContent(array('status' => 'ERROR', 'message' => $errors));
+			getErrors($response, $robot);
 		}
 	}
 	return $response;
@@ -125,13 +113,7 @@ $app->delete('/api/robots/{id:[0-9]+}', function($id) {
 		if ($robot->delete()) {
 			$response->setJsonContent(array('status' => 'OK'));
 		} else {
-			$response->setStatusCode(409, "Conflict");
-			$errors = array();
-			foreach ($robot->getMessages() as $message) {
-				$errors[] = $message->getMessage();
-			}
-
-			$response->setJsonContent(array('status' => 'ERROR', 'message' => $errors));
+			getErrors($response, $robot);
 		}
 	}
 	return $response;
@@ -142,3 +124,14 @@ $app->notFound(function() use ($app) {
 	echo 'This is crazy, but this page was not found!';
 });
 $app->handle();
+
+function getErrors($response, $model)
+{
+	$response->setStatusCode(409, "Conflict");
+			$errors = array();
+			foreach ($model->getMessages() as $message) {
+				$errors[] = $message->getMessage();
+			}
+
+			$response->setJsonContent(array('status' => 'ERROR', 'message' => $errors));
+}
